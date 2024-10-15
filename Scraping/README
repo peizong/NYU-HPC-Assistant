@@ -1,0 +1,12 @@
+To get started, execute these commands as administrator:
+
+pip install requests
+pip install beautifulsoup4
+pip install pandas
+pip install tqdm
+pip install selenium
+pip install trafilatura
+pip install numpy
+pip install pymilvus
+pip install sentence-transformers
+pip install faiss-cpud
