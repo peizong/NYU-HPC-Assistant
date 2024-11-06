@@ -228,51 +228,6 @@ class RAGPreparator:
         rag_df.to_csv(self.output_file, index=False)
         logger.info(f"RAG-prepared data saved to {self.output_file}")
 
-class MilvusEmbedder:
-    def __init__(self, rag_data_file, collection_name="nyu_hpc_embeddings"):
-        self.rag_data_file = rag_data_file
-        self.collection_name = collection_name
-        self.model = SentenceTransformer("jinaai/jina-embeddings-v3", trust_remote_code=True)
-        self.connect_to_milvus()
-
-    def connect_to_milvus(self):
-        connections.connect("default", host="localhost", port="19530")
-
-    def create_collection(self):
-        fields = [
-            FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
-            FieldSchema(name="file", dtype=DataType.VARCHAR, max_length=500),
-            FieldSchema(name="chunk_id", dtype=DataType.INT64),
-            FieldSchema(name="chunk", dtype=DataType.VARCHAR, max_length=2000),
-            FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=768)
-        ]
-        schema = CollectionSchema(fields, "NYU HPC Embeddings")
-        collection = Collection(self.collection_name, schema)
-        
-        index_params = {
-            "index_type": "IVF_FLAT",
-            "metric_type": "L2",
-            "params": {"nlist": 1024}
-        }
-        collection.create_index(field_name="embedding", index_params=index_params)
-        return collection
-
-    def embed_and_insert(self):
-        collection = self.create_collection()
-        df = pd.read_csv(self.rag_data_file)
-        
-        for _, row in tqdm(df.iterrows(), total=len(df), desc="Embedding and inserting"):
-            embedding = self.model.encode(row['chunk'])
-            collection.insert([
-                [row['file']],
-                [row['chunk_id']],
-                [row['chunk']],
-                [np.array([embedding]).astype('float32').tolist()]
-            ])
-        
-        collection.flush()
-        logger.info(f"Inserted {collection.num_entities} entities into Milvus")
-
 class FaissEmbedder:
     def __init__(self, rag_data_file, index_file="faiss_index.pkl"):
         self.rag_data_file = rag_data_file
