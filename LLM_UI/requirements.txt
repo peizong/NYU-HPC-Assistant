@@ -1,0 +1,14 @@
+requests
+beautifulsoup4
+pandas
+tqdm
+selenium
+trafilatura
+torch
+sentence-transformers
+faiss-cpu
+openai
+urllib3
+numpy
+einops
+streamlit
