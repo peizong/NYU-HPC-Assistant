@@ -46,9 +46,8 @@ class JinaEmbedder:
         }
         response = requests.post(self.url, headers=self.headers, json=data)
         response.raise_for_status()
-        return response.json()["data"][0]["embedding"]
+        return np.array(response.json()["data"][0]["embedding"])
 
-# Modify the FaissEmbedder class to use Jina
 class FaissEmbedder:
     def __init__(self, rag_output, index_file=None):
 
@@ -80,7 +79,8 @@ class FaissEmbedder:
     
     def search(self, query, k=4):
         query_embedding = self._get_embedding(query)
-        D, I = self.index.search(np.array([query_embedding]).astype('float32'), k)
+        query_embedding = query_embedding.reshape(1, -1)
+        D, I = self.index.search(query_embedding.astype('float32'), k)
         
         results = []
         for idx in I[0]:
