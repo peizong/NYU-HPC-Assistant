@@ -59,20 +59,18 @@ class FaissEmbedder:
         if index_file and os.path.exists(index_file):
             try:
                 with open(index_file, 'rb') as f:
-                    loaded_index = pickle.load(f)
-                if isinstance(loaded_index, faiss.IndexFlatL2):
-                    self.index = loaded_index
-                else:
-                    logger.warning("Loaded index is not a valid FAISS index. Creating new index.")
-                    self._create_new_index()
+                    data = pickle.load(f)
+                    self.index = data['index']
+                    self.metadata = data['metadata']
             except Exception as e:
                 logger.error(f"Error loading index: {str(e)}. Creating new index.")
                 self._create_new_index()
         else:
             self._create_new_index()
             if index_file:
+                # Save using pickle format
                 with open(index_file, 'wb') as f:
-                    pickle.dump(self.index, f)
+                    pickle.dump({'index': self.index, 'metadata': self.metadata}, f)
 
     def _create_new_index(self):
         """Create a new FAISS index from embeddings"""
@@ -97,8 +95,8 @@ class FaissEmbedder:
         for idx in I[0]:
             results.append({
                 'metadata': {
-                    'chunk': self.df.iloc[idx]['chunk'],
-                    'source': self.df.iloc[idx]['source']
+                    'chunk': self.metadata[idx]['chunk'],
+                    'source': self.metadata[idx]['file']  
                 }
             })
         return results
