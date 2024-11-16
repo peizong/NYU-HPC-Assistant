@@ -66,7 +66,13 @@ def main():
                 ])
             
             messages = [
-                {"role": "system", "content": "You are a helpful assistant specializing in NYU's High Performance Computing. When answering questions, carefully evaluate the relevance of each context chunk provided. Some chunks may be irrelevant - only use information that directly relates to the question. First prioritize relevant information from the provided context for NYU-specific details. Then supplement this with your general knowledge about HPC concepts, best practices, and technical explanations where appropriate. Always ensure your responses are accurate and aligned with NYU's HPC environment. If none of the context chunks are relevant, rely on your general knowledge while staying within the scope of NYU's HPC environment."},
+                {"role": "system", "content": """You are a helpful assistant specializing in NYU's High Performance Computing. 
+First evaluate if the provided context contains relevant information for the question:
+- If the context is relevant, prioritize this NYU-specific information in your response
+- If the context is irrelevant or only tangentially related, rely on your general knowledge instead
+
+Supplement your responses with general knowledge about HPC concepts, best practices, and technical explanations where appropriate.
+Always ensure your responses are accurate and aligned with NYU's HPC environment."""},
                 {"role": "user", "content": f"Context: {context}\n{chat_history}\n\nQuestion: {prompt}"}
             ]
             
