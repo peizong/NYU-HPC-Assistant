@@ -10,6 +10,7 @@ import faiss
 import pickle
 import numpy as np
 from openai import OpenAI
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -104,62 +105,66 @@ class FaissEmbedder:
 
 def download_resources(resources_dir: str):
     """Download required resources from S3"""
-    logger.info("Checking and downloading resources from S3...")
+    lock_file = os.path.join(resources_dir, '.download.lock')
     
+    # Check if another process is downloading
+    if os.path.exists(lock_file):
+        logger.info("Another process is downloading resources, waiting...")
+        while os.path.exists(lock_file):
+            time.sleep(1)
+        return
+        
     try:
-        # Create resources directory
+        # Create lock file and resources directory
         os.makedirs(resources_dir, exist_ok=True)
-        
-        required_files = [RAG_DATA_FILE, FAISS_INDEX_FILE]
-        
-        for filename in required_files:
-            local_path = os.path.join(resources_dir, filename)
+        with open(lock_file, 'w') as f:
+            f.write('downloading')
             
-            if os.path.exists(local_path):
-                logger.info(f"{filename} already exists, skipping download")
-                continue
-                
-            file_url = S3_RESOURCES_URL + f"resources/{filename}"
-            logger.info(f"Downloading {filename}...")
+        # Download RAG data file
+        rag_file_path = os.path.join(resources_dir, RAG_DATA_FILE)
+        if not os.path.exists(rag_file_path):
+            logger.info(f"Downloading {RAG_DATA_FILE}...")
+            response = requests.get(S3_RESOURCES_URL + RAG_DATA_FILE)
+            response.raise_for_status()
+            with open(rag_file_path, 'wb') as f:
+                f.write(response.content)
+            logger.info(f"Successfully downloaded {RAG_DATA_FILE}")
             
-            try:
-                file_response = requests.get(file_url, stream=True)
-                file_response.raise_for_status()
-                
-                with open(local_path, 'wb') as f:
-                    for chunk in file_response.iter_content(chunk_size=8192):
-                        f.write(chunk)
-                        
-                logger.info(f"Successfully downloaded {filename}")
-                
-            except requests.exceptions.RequestException as e:
-                logger.error(f"Failed to download {filename}: {str(e)}")
-                raise
-                
+        # Download FAISS index file
+        index_file_path = os.path.join(resources_dir, FAISS_INDEX_FILE)
+        if not os.path.exists(index_file_path):
+            logger.info(f"Downloading {FAISS_INDEX_FILE}...")
+            response = requests.get(S3_RESOURCES_URL + FAISS_INDEX_FILE)
+            response.raise_for_status()
+            with open(index_file_path, 'wb') as f:
+                f.write(response.content)
+            logger.info(f"Successfully downloaded {FAISS_INDEX_FILE}")
+            
     except Exception as e:
-        logger.error(f"Failed to download resources: {str(e)}")
+        logger.error(f"Error downloading resources: {str(e)}")
         raise
+    finally:
+        # Remove lock file when done
+        if os.path.exists(lock_file):
+            os.remove(lock_file)
 
-def initialize_embedder():
-    """Initialize the FAISS embedder with required resources"""
+@st.cache_resource(show_spinner=False)
+def get_cached_embedder():
+    """Cached version of embedder initialization"""
     script_dir = os.path.dirname(os.path.abspath(__file__))
     resources_dir = os.path.join(script_dir, RESOURCES_DIR_NAME)
     
-    # Check if resources exist, download if needed
-    required_files = [RAG_DATA_FILE, FAISS_INDEX_FILE]
-    resources_exist = all(
-        os.path.exists(os.path.join(resources_dir, file))
-        for file in required_files
-    )
-    
-    if not resources_exist:
-        with st.spinner('Downloading required resources...'):
-            download_resources(resources_dir)
+    # Ensure resources exist
+    download_resources(resources_dir)
     
     rag_output = os.path.join(resources_dir, RAG_DATA_FILE)
     faiss_index_file = os.path.join(resources_dir, FAISS_INDEX_FILE)
     
     return FaissEmbedder(rag_output, index_file=faiss_index_file)
+
+def initialize_embedder():
+    """Initialize the FAISS embedder with required resources"""
+    return get_cached_embedder()
 
 def main():
     st.set_page_config(page_title=PAGE_TITLE, page_icon=PAGE_ICON)
