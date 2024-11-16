@@ -19,8 +19,11 @@ CHECKPOINT_SAVE_FREQUENCY = 5  # Save checkpoint every N iterations
 
 # System prompt for the LLM
 SYSTEM_PROMPT = """You are a helpful assistant specializing in NYU's High Performance Computing. 
-When answering questions, first prioritize information from the provided context for NYU-specific details. 
-Then supplement this with your general knowledge about HPC concepts, best practices, and technical explanations where relevant. 
+First evaluate if the provided context contains relevant information for the question:
+- If the context is relevant, prioritize this NYU-specific information in your response
+- If the context is irrelevant or only tangentially related, rely on your general knowledge instead
+
+Supplement your responses with general knowledge about HPC concepts, best practices, and technical explanations where appropriate.
 Always ensure your responses are accurate and aligned with NYU's HPC environment."""
 
 class FaissEmbedder:
