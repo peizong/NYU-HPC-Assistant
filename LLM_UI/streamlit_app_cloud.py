@@ -59,8 +59,7 @@ class FaissEmbedder:
             try:
                 with open(index_file, 'rb') as f:
                     loaded_index = pickle.load(f)
-                # Verify the loaded object is a FAISS index
-                if isinstance(loaded_index, faiss.swigfaiss.IndexFlatL2):
+                if isinstance(loaded_index, faiss.IndexFlatL2):
                     self.index = loaded_index
                 else:
                     logger.warning("Loaded index is not a valid FAISS index. Creating new index.")
