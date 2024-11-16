@@ -50,30 +50,41 @@ class JinaEmbedder:
 
 class FaissEmbedder:
     def __init__(self, rag_output, index_file=None):
-
         self.df = pd.read_csv(rag_output)
         self.embedder = JinaEmbedder(os.getenv("JINA_API_KEY"))
-        self.openai_client = OpenAI() 
-        
+        self.openai_client = OpenAI()
 
+        # Initialize index
         if index_file and os.path.exists(index_file):
-            with open(index_file, 'rb') as f:
-                self.index = pickle.load(f)
+            try:
+                with open(index_file, 'rb') as f:
+                    loaded_index = pickle.load(f)
+                # Verify the loaded object is a FAISS index
+                if isinstance(loaded_index, faiss.swigfaiss.IndexFlatL2):
+                    self.index = loaded_index
+                else:
+                    logger.warning("Loaded index is not a valid FAISS index. Creating new index.")
+                    self._create_new_index()
+            except Exception as e:
+                logger.error(f"Error loading index: {str(e)}. Creating new index.")
+                self._create_new_index()
         else:
-            embeddings = []
-            for chunk in self.df['chunk']:
-                embedding = self._get_embedding(chunk)
-                embeddings.append(embedding)
-            
-            # Create and save FAISS index
-            dimension = len(embeddings[0])
-            self.index = faiss.IndexFlatL2(dimension)
-            self.index.add(np.array(embeddings).astype('float32'))
-            
+            self._create_new_index()
             if index_file:
                 with open(index_file, 'wb') as f:
                     pickle.dump(self.index, f)
-    
+
+    def _create_new_index(self):
+        """Create a new FAISS index from embeddings"""
+        embeddings = []
+        for chunk in self.df['chunk']:
+            embedding = self._get_embedding(chunk)
+            embeddings.append(embedding)
+        
+        dimension = len(embeddings[0])
+        self.index = faiss.IndexFlatL2(dimension)
+        self.index.add(np.array(embeddings).astype('float32'))
+
     def _get_embedding(self, text):
         return self.embedder.get_embedding(text)
     
