@@ -34,7 +34,10 @@ USE_PREGENERATED_RESOURCES = True  # Set to True to download from S3
 S3_RESOURCES_URL = "https://nyu-hpc-llm.s3.us-east-1.amazonaws.com/" 
 
 # Global Configuration Variables
-BASE_URL = "https://sites.google.com/nyu.edu/nyu-hpc/"
+BASE_URLS = [
+    "https://sites.google.com/nyu.edu/nyu-hpc/",
+    "https://nyuhpc.github.io/hpc-shell/"
+]
 CHUNK_SIZE = 1000  # Size of text chunks for RAG preparation
 
 # Resource Directory Structure
@@ -147,8 +150,10 @@ def main():
         
         if is_scraping_incomplete:
             logger.info("Starting or resuming web scraping...")
-            scraper = WebScraper(BASE_URL, output_folder, url_file=url_file)
-            scraper.scrape()
+            for base_url in BASE_URLS:
+                logger.info(f"Scraping {base_url}...")
+                scraper = WebScraper(base_url, output_folder, url_file=url_file)
+                scraper.scrape()
         else:
             logger.info("Scraping was previously completed. Skipping scraping step.")
 
