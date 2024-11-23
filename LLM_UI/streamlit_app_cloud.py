@@ -211,7 +211,7 @@ def main():
 First evaluate if the provided context contains relevant information for the question:
 - If the context is relevant, prioritize this NYU-specific information in your response
 - If the context is irrelevant or only tangentially related, rely on your general knowledge instead
-- Try not to mention "context", user does not know how the code works internally.
+- Do not mention "context", the user does not know how the code works internally.
 
 Supplement your responses with general knowledge about HPC concepts, best practices, and technical explanations where appropriate.
 Always ensure your responses are accurate and aligned with NYU's HPC environment."""},
