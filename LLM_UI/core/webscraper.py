@@ -41,6 +41,8 @@ class WebScraper:
         self.driver = None
         self.base_url_scraped = False
         
+        self.base_domain = urlparse(base_url).netloc
+        
         self.headers = {
             'User-Agent': USER_AGENT
         }
@@ -129,13 +131,14 @@ class WebScraper:
         for link in links:
             href = link['href']
             new_url = urljoin(self.base_url, href)
+            parsed_new_url = urlparse(new_url)
             
             # Skip URLs that are likely to be noise
             if any([
-                not new_url.startswith(self.base_url),  # External links
+                parsed_new_url.netloc != self.base_domain,  # External links
                 '#' in new_url,  # Skip ALL anchor links
                 new_url in self.visited_urls,  # Already visited
-                not urlparse(new_url).path or urlparse(new_url).path == '/'  # Root/homepage variations
+                not parsed_new_url.path or parsed_new_url.path == '/'  # Root/homepage variations
             ]):
                 continue
                 
@@ -145,32 +148,34 @@ class WebScraper:
         return new_urls
 
     def scrape(self):
+        # Create a subdirectory for this specific base URL
+        base_domain_folder = os.path.join(self.output_folder, urlparse(self.base_url).netloc)
+        os.makedirs(base_domain_folder, exist_ok=True)
+        
         urls_to_scrape = set([self.base_url]) if self.base_url not in self.scraped_urls else set()
         all_discovered_urls = urls_to_scrape.copy()
         
         try:
             with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
                 while urls_to_scrape:
-                    # Convert set to list for mapping
                     current_batch = list(urls_to_scrape)
                     urls_to_scrape.clear()
                     
-                    # Process URLs in parallel
                     new_urls_lists = list(executor.map(self.scrape_page, current_batch))
                     
-                    # Add new URLs to process
                     for sublist in new_urls_lists:
                         for url in sublist:
                             if url not in self.scraped_urls and url not in all_discovered_urls:
                                 urls_to_scrape.add(url)
                                 all_discovered_urls.add(url)
             
-            # Mark scraping as complete
-            with open(self.scraping_complete_file, 'w') as f:
+            # Mark this base URL as complete
+            domain_complete_file = os.path.join(base_domain_folder, 'scraping_complete.flag')
+            with open(domain_complete_file, 'w') as f:
                 f.write(datetime.now().isoformat())
                 
         except Exception as e:
-            print(f"Scraping interrupted: {str(e)}")
+            print(f"Scraping interrupted for {self.base_url}: {str(e)}")
             raise
         finally:
             if self.driver:
