@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st. title('Serena's playground')
+st. title('Serenas playground')
 
 st.text('This is an app that I made for Serena.')
 
