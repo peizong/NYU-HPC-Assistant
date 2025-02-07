@@ -29,7 +29,8 @@ MAX_CHAT_HISTORY = 6
 RESOURCES_DIR_NAME = "resources"
 RAG_DATA_FILE = "rag_prepared_data_nyu_hpc.csv"
 FAISS_INDEX_FILE = "faiss_index.pkl"
-S3_RESOURCES_URL = "https://nyu-hpc-llm.s3.us-east-1.amazonaws.com/resources/"
+#S3_RESOURCES_URL = "https://nyu-hpc-llm.s3.us-east-1.amazonaws.com/resources/"
+S3_RESOURCES_URL = "https://nyuhpc-chatbot.s3.us-east-2.amazonaws.com/resources"
 
 class JinaEmbedder:
     """Handles embeddings using Jina API"""
