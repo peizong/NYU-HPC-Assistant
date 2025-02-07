@@ -31,7 +31,9 @@ logger = logging.getLogger(__name__)
 #IMPORTANT: Set to True to download from S3
 
 USE_PREGENERATED_RESOURCES = False  # Set to True to download from S3
-S3_RESOURCES_URL = "https://nyu-hpc-llm.s3.us-east-1.amazonaws.com/" 
+#S3_RESOURCES_URL = "https://nyu-hpc-llm.s3.us-east-1.amazonaws.com/" 
+S3_RESOURCES_URL = "https://nyuhpc-chatbot.s3.us-east-2.amazonaws.com/resources"
+
 
 # Global Configuration Variables
 BASE_URLS = [
