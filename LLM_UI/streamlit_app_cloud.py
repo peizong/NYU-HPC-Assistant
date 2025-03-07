@@ -54,8 +54,19 @@ class FaissEmbedder:
     def __init__(self, rag_output, index_file=None):
         self.df = pd.read_csv(rag_output)
         self.embedder = JinaEmbedder(os.getenv("JINA_API_KEY"))
-        self.openai_client = OpenAI()
-
+        #self.openai_client = OpenAI()
+        #changed by Pei#######################
+        self.openai_client = OpenAI(
+            api_key="OPENAI_API_KEY", # defaults to os.environ.get("OPENAI_API_KEY")
+            base_url="https://ai-gateway.apps.cloud.rt.nyu.edu/v1/", #PORTKEY_GATEWAY_URL,
+            default_headers=createHeaders(
+            provider="openai",
+            api_key="PORTKEY_API_KEY" # defaults to os.environ.get("PORTKEY_API_KEY")
+            # virtual_key="VIRTUAL_KEY_VALUE" if you want provider key on gateway instead of client
+                                          )
+        )
+        #changed by Pei#######################
+        
         # Initialize index
         if index_file and os.path.exists(index_file):
             try:
