@@ -10,6 +10,7 @@ import faiss
 import pickle
 import numpy as np
 from openai import OpenAI
+from portkey_ai import PORTKEY_GATEWAY_URL, createHeaders #pei
 import time
 
 # Configure logging
