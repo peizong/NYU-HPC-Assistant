@@ -12,3 +12,4 @@ urllib3
 numpy
 einops
 streamlit
+portkey-ai
