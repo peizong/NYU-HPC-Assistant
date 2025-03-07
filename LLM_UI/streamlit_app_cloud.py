@@ -61,7 +61,7 @@ class FaissEmbedder:
             base_url="https://ai-gateway.apps.cloud.rt.nyu.edu/v1/", #PORTKEY_GATEWAY_URL,
             default_headers=createHeaders(
             provider="openai",
-            api_key="PORTKEY_API_KEY" # defaults to os.environ.get("PORTKEY_API_KEY")
+            api_key="PORTKEY_API_KEY" # defaults to os.environ.get("PORTKEY_API_KEY"),
             virtual_key="VIRTUAL_KEY_VALUE" #if you want provider key on gateway instead of client
                                           )
         )
