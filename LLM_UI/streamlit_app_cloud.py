@@ -68,7 +68,7 @@ class FaissEmbedder:
         # )
         self.openai_client = OpenAI(
             api_key="xxx", #"OPENAI_API_KEY", # defaults to os.environ.get("OPENAI_API_KEY")
-            base_url="https://ai-gateway.apps.cloud.rt.nyu.edu/v1/", #PORTKEY_GATEWAY_URL,
+            base_url="https://ai-gateway.apps.cloud.rt.nyu.edu/v1", #PORTKEY_GATEWAY_URL,
             default_headers=createHeaders(
             #provider="openai",
             api_key= "8gTMTBfxZ9zzXHp/ZTcbUhPo9+81", #os.environ.get("PORTKEY_API_KEY"), #"PORTKEY_API_KEY", # defaults to os.environ.get("PORTKEY_API_KEY"),
@@ -242,6 +242,7 @@ Always ensure your responses are accurate and aligned with NYU's HPC environment
             
             # Stream the response
             stream = st.session_state.embedder.openai_client.chat.completions.create(
+            #stream = st.session_state.embedder.openai_client.chat.completions.create(
                 model=MODEL_NAME,
                 messages=messages,
                 stream=True,
