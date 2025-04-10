@@ -255,7 +255,9 @@ Always ensure your responses are accurate and aligned with NYU's HPC environment
             #         message_placeholder.markdown(full_response + "▌")
             
             # message_placeholder.markdown(full_response)
-            stream=[stream]
+
+            #changed by Pei
+            #stream=[stream]
             for chunk in stream:
                 if chunk.choices[0].message.content is not None:
                     full_response += chunk.choices[0].message.content
