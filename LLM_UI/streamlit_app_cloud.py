@@ -249,20 +249,20 @@ Always ensure your responses are accurate and aligned with NYU's HPC environment
                 stream=True,
             )
 
-            # for chunk in stream:
-            #     if chunk.choices[0].delta.content is not None:
-            #         full_response += chunk.choices[0].delta.content
-            #         message_placeholder.markdown(full_response + "▌")
+            for chunk in stream:
+                if chunk.choices[0].delta.content is not None:
+                    full_response += chunk.choices[0].delta.content
+                    message_placeholder.markdown(full_response + "▌")
             
-            # message_placeholder.markdown(full_response)
+            message_placeholder.markdown(full_response)
 
             #changed by Pei
             #stream=[stream]
-            for chunk in stream:
-                if chunk.choices[0].message.content is not None:
-                    full_response += chunk.choices[0].message.content
-                    message_placeholder.markdown(full_response + "▌")
-            message_placeholder.markdown(full_response)
+            # for chunk in stream:
+            #     if chunk.choices[0].message.content is not None:
+            #         full_response += chunk.choices[0].message.content
+            #         message_placeholder.markdown(full_response + "▌")
+            # message_placeholder.markdown(full_response)
         
         st.session_state.messages.append({"role": "assistant", "content": full_response})
 
